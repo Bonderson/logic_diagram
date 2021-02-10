@@ -15,10 +15,10 @@ class Gate:
         current_gates_number += 1
         self.out_connections_list = [{} for _ in range(self.output_number)]
         self.in_connections_list = [None for _ in range(self.input_number)]
+        self.output_value = None
 
-    def func(self, *args: bool):
-        # to override
-        pass
+    def func(self):
+        return self.return_value(self.output_value)
 
     def connect(self, other, self_channel_number=None, other_channel_number=None):
         if self_channel_number is None:
@@ -53,63 +53,92 @@ class Gate:
         return value
 
     def get_info(self):
-        pass
+        ret = f"Gate name is '{self.gate_name}'\n" \
+              f"This gate is in-connected to:\n"
+        for channel in range(len(self.in_connections_list)):
+            ret += "\tChannel "+str(channel+1)+": "
+            if type(self.in_connections_list[channel]) == Gate:
+                ret += self.in_connections_list[channel].gate_name + "\n"
+            else:
+                ret += "unconnected\n"
+        ret += "This gate out-connects to:\n"
+        for channel in range(len(self.out_connections_list)):
+            ret += "\tChannel "+str(channel+1)+": \n"
+            for gate in self.out_connections_list[channel]:
+                ret += f"\t\t{gate.gate_name} to its {self.out_connections_list[channel][gate]}"
+
+            else:
+                ret += "unconnected\n"
 
 
 class OR(Gate):
     def __init__(self, gname="OR" + str(current_gates_number + 1), *inpvs):
         super().__init__(gname, 2, 1, *inpvs)
+        self.output_value = self.input_values[0] or self.input_values[1]
 
     def func(self):
-        return self.return_value(self.input_values[0] or self.input_values[1])
+        self.output_value = self.input_values[0] or self.input_values[1]
+        return super(OR, self).func()
 
 
 class XOR(Gate):
     def __init__(self, gname="XOR"+str(current_gates_number + 1), *inpvs):
         super().__init__(gname, 2, 1, *inpvs)
+        self.output_value = self.input_values[0] != self.input_values[1]
 
     def func(self):
-        return self.return_value(self.input_values[0] != self.input_values[1])
+        self.output_value = self.input_values[0] != self.input_values[1]
+        return super(XOR, self).func()
 
 
 class AND(Gate):
     def __init__(self, gname="AND"+str(current_gates_number + 1), *inpvs):
         super().__init__(gname, 2, 1, *inpvs)
+        self.output_value = self.input_values[0] and self.input_values[1]
 
     def func(self):
-        return self.return_value(self.input_values[0] and self.input_values[1])
+        self.output_value = self.input_values[0] and self.input_values[1]
+        return super(AND, self).func()
 
 
 class NOT(Gate):
     def __init__(self, gname="NOT"+str(current_gates_number + 1), *inpvs):
         super().__init__(gname, 1, 1, *inpvs)
+        self.output_value = not self.input_values[0]
 
     def func(self):
-        return self.return_value(not self.input_values[0])
+        self.output_value = not self.input_values[0]
+        return super(NOT, self).func()
 
 
 class NOR(Gate):
     def __init__(self, gname="NOR"+str(current_gates_number + 1), *inpvs):
         super().__init__(gname, 2, 1, *inpvs)
+        self.output_value = not(self.input_values[0] or self.input_values[1])
 
     def func(self):
-        return self.return_value(not(self.input_values[0] or self.input_values[1]))
+        self.output_value = not(self.input_values[0] or self.input_values[1])
+        return super(NOR, self).func()
 
 
 class NAND(Gate):
     def __init__(self, gname="NAND"+str(current_gates_number + 1), *inpvs):
         super().__init__(gname, 2, 1, *inpvs)
+        self.output_value = not (self.input_values[0] and self.input_values[1])
 
     def func(self):
-        return self.return_value(not(self.input_values[0] and self.input_values[1]))
+        self.output_value = not (self.input_values[0] and self.input_values[1])
+        return super(NAND, self).func()
 
 
 class BUF(Gate):
     def __init__(self, gname="BUF"+str(current_gates_number + 1), *inpvs):
         super().__init__(gname, 1, 1, *inpvs)
+        self.output_value = self.input_values[0]
 
-    def func(self, i1: bool):
-        return self.return_value(self.input_values[0])
+    def func(self):
+        self.output_value = self.input_values[0]
+        return super(BUF, self).func()
 
 
 class SND(Gate):
@@ -117,6 +146,3 @@ class SND(Gate):
         assert isinstance(value, bool)
         super().__init__(gname, 0, 1)
         self.output_value = bool(value)
-
-    def func(self):
-        return self.return_value(self.output_value)
