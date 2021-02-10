@@ -13,3 +13,14 @@
 ## class button
 ## class mainwindow
 
+####################
+HOW TO MAKE A CHAIN?
+
+--IN1--||||||||         ||||||||
+       |  OR  |---IN3---| NOT  |----OUT
+--IN2--||||||||         ||||||||
+
+IN3 = or1.func(IN1, IN2)
+not1(or1.func(IN1, IN2)) - works correctly but not nice
+
+not1.connect(or1) ?
