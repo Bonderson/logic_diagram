@@ -18,6 +18,7 @@ class Gate:
         self.output_value = None
 
     def func(self):
+        assert None not in self.input_values, "Function error: one input is either disconnected or invalid"
         return self.return_value(self.output_value)
 
     def connect(self, other, self_channel_number=None, other_channel_number=None):
@@ -34,6 +35,7 @@ class Gate:
                     other.in_connections_list[i] = self
                     connected = True
                     break
+
         else:
             other_channel_number -= 1
             other.input_values[other_channel_number] = self.func()
@@ -41,9 +43,31 @@ class Gate:
             other.in_connections_list[other_channel_number] = self
             connected = True
 
-        return connected
+        if not connected:
+            raise RuntimeError("Connection failed: both channels are in use and no particular channel was specified")
+        # return connected
+
+    def disconnect(self, other):
+        assert other in [j for sub in self.out_connections_list for j in sub], \
+            "Disconnection error: this gates were not connected"
+
+        # Old version:
+        # for channel in range(len(other.in_connections_list)):
+        #     if other.in_connections_list[channel] is self:
+        #         other.in_connections_list[channel] = None
+        #         other.input_values[channel] = None
+
+        # todo! write it more beautiful
+        for channel in range(len(self.out_connections_list)):
+            for gate in self.out_connections_list[channel]:
+                if gate is other:
+                    other.in_connections_list[self.out_connections_list[channel][gate]-1] = None
+                    other.input_values[self.out_connections_list[channel][gate]-1] = None
+                    self.out_connections_list[channel] = {}
 
     def return_value(self, value, output_channel=None):
+        assert type(self.output_value) is bool, \
+            "Output error: invalid output value"
         if output_channel is None:
             output_channel = self.output_number-1
         else:
@@ -53,7 +77,8 @@ class Gate:
         return value
 
     def get_info(self):
-        ret = f"Gate name is '{self.gate_name}'\n" \
+        ret = f"Gate name is '{self.gate_name}'\n"\
+              f"Number of inputs: {self.input_number}, number of outputs: {self.output_number}\n\n"\
               f"This gate is in-connected to:\n"
         for channel in range(len(self.in_connections_list)):
             ret += "\tChannel "+str(channel+1)+": "
@@ -65,10 +90,12 @@ class Gate:
         for channel in range(len(self.out_connections_list)):
             ret += "\tChannel "+str(channel+1)+": \n"
             for gate in self.out_connections_list[channel]:
-                ret += f"\t\t{gate.gate_name} to its {self.out_connections_list[channel][gate]}"
-
+                ret += f"\t\t{gate.gate_name} to its in-channel {self.out_connections_list[channel][gate]}\n"
             else:
                 ret += "unconnected\n"
+        ret += f"\nInput values are: {self.input_values}"
+        ret += f"Output value now is {self.output_value}\n"
+        return ret
 
 
 class OR(Gate):
@@ -146,3 +173,13 @@ class SND(Gate):
         assert isinstance(value, bool)
         super().__init__(gname, 0, 1)
         self.output_value = bool(value)
+
+
+class RCV(Gate):
+    def __init__(self, value=None, gname="RCV" + str(current_gates_number + 1)):
+        assert value is None or isinstance(value, bool)
+        super().__init__(gname, 1, 0)
+        self.input_values = [value]
+
+    def func(self):
+        return self.input_values[0]
