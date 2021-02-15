@@ -1,23 +1,26 @@
+from math import *
 current_gates_number = 0
 
 
 class Gate:
-    def __init__(self, gname: str, inum: int, onum: int, *inpvs):
+    def __init__(self, gname: str, inum: int, onum: int, selnum=0, *inpvs):
         global current_gates_number
         assert (len(inpvs) == inum or not inpvs), all(isinstance(x, bool) for x in inpvs)
         self.gate_name = gname
         self.input_number = inum
         self.output_number = onum
+        self.select_lines_number = selnum
         if not inpvs:
             self.input_values = [None for _ in range(self.input_number)]  # None is analogue of "X" state
         else:
             self.input_values = [bool(i) for i in inpvs]
-        current_gates_number += 1
+        self.select_values = []
         self.out_connections_list = [{} for _ in range(self.output_number)]
         self.in_connections_list = [None for _ in range(self.input_number)]
         self.output_value = None
+        current_gates_number += 1
 
-    def func(self):
+    def func(self, sel=None):
         assert None not in self.input_values, "Function error: one input is either disconnected or invalid"
         return self.return_value(self.output_value)
 
@@ -103,7 +106,7 @@ class OR(Gate):
         super().__init__(gname, 2, 1, *inpvs)
         self.output_value = self.input_values[0] or self.input_values[1]
 
-    def func(self):
+    def func(self, sel=None):
         self.output_value = self.input_values[0] or self.input_values[1]
         return super(OR, self).func()
 
@@ -113,7 +116,7 @@ class XOR(Gate):
         super().__init__(gname, 2, 1, *inpvs)
         self.output_value = self.input_values[0] != self.input_values[1]
 
-    def func(self):
+    def func(self, sel=None):
         self.output_value = self.input_values[0] != self.input_values[1]
         return super(XOR, self).func()
 
@@ -123,7 +126,7 @@ class AND(Gate):
         super().__init__(gname, 2, 1, *inpvs)
         self.output_value = self.input_values[0] and self.input_values[1]
 
-    def func(self):
+    def func(self, sel=None):
         self.output_value = self.input_values[0] and self.input_values[1]
         return super(AND, self).func()
 
@@ -133,7 +136,7 @@ class NOT(Gate):
         super().__init__(gname, 1, 1, *inpvs)
         self.output_value = not self.input_values[0]
 
-    def func(self):
+    def func(self, sel=None):
         self.output_value = not self.input_values[0]
         return super(NOT, self).func()
 
@@ -143,7 +146,7 @@ class NOR(Gate):
         super().__init__(gname, 2, 1, *inpvs)
         self.output_value = not(self.input_values[0] or self.input_values[1])
 
-    def func(self):
+    def func(self, sel=None):
         self.output_value = not(self.input_values[0] or self.input_values[1])
         return super(NOR, self).func()
 
@@ -153,7 +156,7 @@ class NAND(Gate):
         super().__init__(gname, 2, 1, *inpvs)
         self.output_value = not (self.input_values[0] and self.input_values[1])
 
-    def func(self):
+    def func(self, sel=None):
         self.output_value = not (self.input_values[0] and self.input_values[1])
         return super(NAND, self).func()
 
@@ -163,7 +166,7 @@ class BUF(Gate):
         super().__init__(gname, 1, 1, *inpvs)
         self.output_value = self.input_values[0]
 
-    def func(self):
+    def func(self, sel=None):
         self.output_value = self.input_values[0]
         return super(BUF, self).func()
 
@@ -181,5 +184,29 @@ class RCV(Gate):
         super().__init__(gname, 1, 0)
         self.input_values = [value]
 
-    def func(self):
+    def func(self, sel=None):
         return self.input_values[0]
+
+
+class MUX(Gate):
+    def __init__(self, gname="MUX" + str(current_gates_number + 1), inum=2, selnum=0, *inpvs):
+        if selnum == 0:
+            selnum = ceil(log2(inum))
+        super().__init__(gname, inum, 1, selnum, *inpvs)
+        self.select_values = [0 for _ in range(0, selnum)]  # fixme! Does it make any sense?
+        self.output_value = None
+
+    def func(self, sel=None):
+        if sel is None:
+            self.output_value = None
+        else:
+            assert type(sel) is list, "MUX process failed: Selection signal is invalid"
+            assert len(sel) == self.select_lines_number, "MUX process failed: Selection signal is invalid"
+            sel = int(''.join([str(int(i)) for i in sel]), 2)
+            self.output_value = self.input_values[sel]
+
+        return super(MUX, self).func()
+
+
+class Decoder(Gate):
+    pass

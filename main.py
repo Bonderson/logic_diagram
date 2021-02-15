@@ -1,65 +1,97 @@
 from gates import *
 
+try:
+    # just testing, nothing useful here
+    # or1 = OR("test")
+    # in1 = bool(int(input()))
+    # in2 = False
+    # in3 = True
+    #
+    # snd1 = SND(in1)
+    # snd2 = SND(in2)
+    # snd3 = SND(in3)
+    #
+    # snd1.connect(or1)
+    # snd2.connect(or1)
+    # print(or1.in_connections_list)
+    # print(or1.func())
+    #
+    # snd3.connect(or1)
+    # print(or1.in_connections_list)
+    # print(or1.func())
+    #
+    # snd3.connect(or1, other_channel_number=1)
+    # print(or1.in_connections_list)
+    # print(or1.func())
 
-# just testing, nothing useful here
-# or1 = OR("test")
-# in1 = bool(int(input()))
-# in2 = False
-# in3 = True
-#
-# snd1 = SND(in1)
-# snd2 = SND(in2)
-# snd3 = SND(in3)
-#
-# snd1.connect(or1)
-# snd2.connect(or1)
-# print(or1.in_connections_list)
-# print(or1.func())
-#
-# snd3.connect(or1)
-# print(or1.in_connections_list)
-# print(or1.func())
-#
-# snd3.connect(or1, other_channel_number=1)
-# print(or1.in_connections_list)
-# print(or1.func())
+    ##########################################
+    # Trying to assemble first simple scheme #
+    ##########################################
+    a = SND(True)
+    b = SND(False)
+    c = SND(True)
+    d = SND(False)
+    or1 = OR("or1")
+    a.connect(or1)
+    b.connect(or1)
+    not1 = NOT("not1")
+    or1.connect(not1)
+    not2 = NOT("not2")
+    c.connect(not2)
+    nand1 = NAND("nand1")
+    not1.connect(nand1)
+    not2.connect(nand1)
+    xor1 = XOR("xor1")
+    nand1.connect(xor1)
+    d.connect(xor1)
+    y = RCV(gname="Y")
+    xor1.connect(y)
+    print(y.func())
 
+    #############################################
+    # It worked! Let's try to break it down now #
+    #############################################
 
-##########################################
-# Trying to assemble first simple scheme #
-##########################################
-a = SND(True)
-b = SND(False)
-c = SND(True)
-d = SND(False)
-or1 = OR("or1")
-a.connect(or1)
-b.connect(or1)
-not1 = NOT("not1")
-or1.connect(not1)
-not2 = NOT("not2")
-c.connect(not2)
-nand1 = NAND("nand1")
-not1.connect(nand1)
-not2.connect(nand1)
-xor1 = XOR("xor1")
-nand1.connect(xor1)
-d.connect(xor1)
-y = RCV(gname="Y")
-xor1.connect(y)
-print(y.func())
+    # y.connect(y) - good, raised error
+    e = SND(False)
 
-#############################################
-# It worked! Let's try to break it down now #
-#############################################
+    a.disconnect(or1)
+    e.connect(or1)
+    print(or1.func())  # perfect! disconnection successful
 
-# y.connect(y) - good, raised error
-e = SND(False)
+    e.disconnect(or1)
+    # print(or1.func()) - good, raised error
+    # e.disconnect(or1)  - good, didn't disconnect twice
 
-a.disconnect(or1)
-e.connect(or1)
-print(or1.func())  # perfect! disconnection successful
+    ##########################################################
+    # Trying to embed a multiplexer into the previous scheme #
+    ##########################################################
+    a = SND(True)
+    b = SND(False)
+    c = SND(True)
+    d = SND(False)
+    or1 = OR("or1")
+    a.connect(or1)
+    b.connect(or1)
+    not1 = NOT("not1")
+    or1.connect(not1)
+    not2 = NOT("not2")
+    c.connect(not2)
+    nand1 = NAND("nand1")
+    not1.connect(nand1)
+    not2.connect(nand1)
+    xor1 = XOR("xor1")
+    nand1.connect(xor1)
+    d.connect(xor1)
+    y = BUF(gname="Y")
+    xor1.connect(y)
+    mux1 = MUX("mux1", 4)
+    y.connect(mux1)
+    y.connect(mux1)
+    y.connect(mux1)
+    e.connect(mux1)
+    print(mux1.func([0, 1]))
 
-e.disconnect(or1)
-# print(or1.func()) - good, raised error
-# e.disconnect(or1) - good, didn't disconnect twice
+except Exception as exception:
+    print(exception)
+    print("Error caught. Terminating")
