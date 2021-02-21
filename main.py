@@ -90,7 +90,24 @@ try:
     y.connect(mux1)
     y.connect(mux1)
     e.connect(mux1)
-    print(mux1.func([0, 1]))
+    print(mux1.func([0, 0]))
+    print()
+    print(mux1.get_info())
+
+    #########################
+    # Testing demultiplexer #
+    #########################
+    a = SND(True)
+    b = SND(False)
+    c = SND(True)
+    d = SND(False)
+    # 1010
+    dms1 = DMS("dms1", 4)
+    a.connect(dms1)
+    b.connect(dms1)
+    c.connect(dms1)
+    d.connect(dms1)
+    print(dms1.func())  # success!
 
 except Exception as exception:
     print(exception)
