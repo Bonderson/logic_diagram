@@ -19,16 +19,16 @@ class Biba(pg.sprite.Sprite):  # оболочка для вентилей, с п
 
 
 def redraw():  # <<переделать, добавить как метод класса box>>
-    gameScreen.fill((255,255,255))
-    for element in pool:
-        gameScreen.blit(element.image, element.rect)
+    gameScreen.fill((255, 255, 255))
+    for elem in pool:
+        gameScreen.blit(elem.image, elem.rect)
     # pg.display.update()
 
 
 pg.init()  # запускаем pygame
 path_rect = "rect.png"  # пока одиночная картинка, <<заменить на список путей каритнок>>
 # Окно игры: размер, позиция
-gameScreen = pg.display.set_mode((500, 400)) # <<замутить как отдельный класс box!!!>>
+gameScreen = pg.display.set_mode((500, 400))  # <<замутить как отдельный класс box!!!>>
 
 pg.display.set_caption("Let's try")
 gameScreen.fill((255, 255, 255))
@@ -61,7 +61,7 @@ while runGame:
                         redraw()
                         break
 
-                if moveobj == None:
+                if moveobj is None:
                     myRect = list(event.pos)  # позиция мыши изначально в кортеже(
                     pool.append(Biba(myRect, path_rect))
                     gameScreen.blit(pool[-1].image, pool[-1].rect)

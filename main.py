@@ -13,15 +13,15 @@ try:
     # #
     # # snd1.connect(or1)
     # # snd2.connect(or1)
-    # # print(or1.in_connections_list)
+    # # print(or1.__in_connections_list)
     # # print(or1.func())
     # #
     # # snd3.connect(or1)
-    # # print(or1.in_connections_list)
+    # # print(or1.__in_connections_list)
     # # print(or1.func())
     # #
     # # snd3.connect(or1, other_channel_number=1)
-    # # print(or1.in_connections_list)
+    # # print(or1.__in_connections_list)
     # # print(or1.func())
     #
     # ##########################################

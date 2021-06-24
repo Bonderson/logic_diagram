@@ -3,7 +3,7 @@ import time
 # from win32api import GetSystemMetrics
 
 
-class display:
+class Display:
     def __init__(self, width, height):
         self.m_screen = pg.display.set_mode((width, height))
         pg.display.set_caption("Logic_scheme")
@@ -179,7 +179,7 @@ class Field:
 
 
 pg.init()
-Display = display(1368 * 3 // 4, 768 * 3 // 4)
+display = Display(1368 * 3 // 4, 768 * 3 // 4)
 runGame = True
 while runGame:
     for event in pg.event.get():
@@ -187,28 +187,30 @@ while runGame:
             runGame = False
 
         if event.type == pg.MOUSEBUTTONUP:
-            Display.l_screen.moveobj = None
+            display.l_screen.moveobj = None
 
         if event.type == pg.MOUSEMOTION:
-            if Display.l_screen.moveobj:
-                Display.l_screen.move_obj(event.pos)
+            if display.l_screen.moveobj:
+                display.l_screen.move_obj(event.pos)
 
         if event.type == pg.MOUSEBUTTONDOWN:
             if event.button == 1:
-                # if Display.l_screen.rect.collidepoint(event.pos):
-                Display.l_screen.click_lmouse(event.pos)
+                # if display.l_screen.rect.collidepoint(event.pos):
+                display.l_screen.click_lmouse(event.pos)
             if event.button == 2:
-                Display.l_screen.create_object(Display.r_screen.gates_pool[0])
+                display.l_screen.create_object(display.r_screen.gates_pool[0])
             if event.button == 3:
-                # if Display.l_screen.rect.collidepoint(event.pos):
-                Display.l_screen.click_rmouse(event.pos)
+                # if display.l_screen.rect.collidepoint(event.pos):
+                display.l_screen.click_rmouse(event.pos)
 
-        if event.type == pg.KEYDOWN and event.key == pg.K_MINUS or event.type == pg.MOUSEBUTTONDOWN and event.button == 5:
-            Display.l_screen.scale_const(-1)
+        if event.type == pg.KEYDOWN and event.key == pg.K_MINUS or \
+                event.type == pg.MOUSEBUTTONDOWN and event.button == 5:
+            display.l_screen.scale_const(-1)
 
-        if event.type == pg.KEYDOWN and event.key == pg.K_EQUALS or event.type == pg.MOUSEBUTTONDOWN and event.button == 4:
-            Display.l_screen.scale_const(1)
+        if event.type == pg.KEYDOWN and event.key == pg.K_EQUALS or \
+                event.type == pg.MOUSEBUTTONDOWN and event.button == 4:
+            display.l_screen.scale_const(1)
 
-    Display.redraw()
+    display.redraw()
     pg.display.update()
 pg.quit()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-#!pip install pygame
+# !pip install pygame
 # # Programm
 
 # In[1]:
@@ -14,31 +14,32 @@ from win32api import GetSystemMetrics
 # In[2]:
 
 
-class display:
+class Display:
     def __init__(self, width, height):
         self.m_screen = pg.display.set_mode((width, height))
         pg.display.set_caption("Logic_scheme")
-        self.l_screen = field(width - width//4, height)
-        self.r_screen = gates_list(width//4, height)
+        self.l_screen = Field(width - width // 4, height)
+        self.r_screen = GatesList(width // 4, height)
         self.mini_rect = pg.Rect(width - width//4 - 2, 0, 4, height)
         self.redraw()
+
     def redraw(self):
-        self.m_screen.fill((0,0,0))
+        self.m_screen.fill((0, 0, 0))
         self.m_screen.blit(*self.l_screen.scale())
         self.m_screen.blit(self.r_screen.surface, self.r_screen.rect)
-        pg.draw.rect(self.m_screen, [0,0,0], self.mini_rect)
+        pg.draw.rect(self.m_screen, [0, 0, 0], self.mini_rect)
 
 
 # In[3]:
 
 
 class Gateway:
-    def __init__(self, name, rect, wire = None):
+    def __init__(self, name, rect, wire=None):
         self.name = name
         self.wire = wire
         self.rect = rect
     
-    def change_wire(self, wire = None):
+    def change_wire(self, wire=None):
         self.wire = wire
 
 
@@ -51,7 +52,7 @@ class Wire:
         self.input = inp
         self.output = outp
         self.state = 0
-        self.color = [0,0,0]
+        self.color = [0, 0, 0]
 
     def __str__(self):
         return "wire"
@@ -81,14 +82,13 @@ class Wire:
 # In[5]:
 
 
-class Biba(pg.sprite.Sprite): #оболочка для вентилей, с помощью которой можно взаимодействовать с ними
-    def __init__(self, coord, filename, name, inum, onum, selnum = 0):
+class Biba(pg.sprite.Sprite):  # оболочка для вентилей, с помощью которой можно взаимодействовать с ними
+    def __init__(self, coord, filename, name, inum, onum, selnum=0):
         self.name = name
         pg.sprite.Sprite.__init__(self)
-        self.image = pg.image.load(filename).convert_alpha() # содержит отмасштабированную картинку
-        self.rect = self.image.get_rect(center = (coord[0],
-                                                  coord[1]))
-        self.offsets = [0,0]
+        self.image = pg.image.load(filename).convert_alpha()  # содержит отмасштабированную картинку
+        self.rect = self.image.get_rect(center=(coord[0], coord[1]))
+        self.offsets = [0, 0]
         self.left_rect = pg.Rect(self.rect.left, self.rect.top, 20, self.rect.height)
         
         self.right_rect = pg.Rect(self.rect.right-20, self.rect.top, 20, self.rect.height)
@@ -103,7 +103,8 @@ class Biba(pg.sprite.Sprite): #оболочка для вентилей, с по
             
         self.output_pool = list()
         for i in range(onum):
-            rect = pg.Rect(self.right_rect.left, self.right_rect.top, self.right_rect.width, self.right_rect.height//onum)
+            rect = pg.Rect(self.right_rect.left, self.right_rect.top,
+                           self.right_rect.width, self.right_rect.height//onum)
             rect.move_ip(0, i*self.right_rect.height//onum)
             self.output_pool.append(Gateway(self.name[4:], rect))
             
@@ -158,19 +159,19 @@ class Biba(pg.sprite.Sprite): #оболочка для вентилей, с по
 # In[6]:
 
 
-class gates_list:
+class GatesList:
     def __init__(self, width, height):
         self.time_name = [0, -1]
         self.surface = pg.surface.Surface((width, height))
-        self.rect = self.surface.get_rect(center = (width*3 + width//2, height//2))
-        self.surface.fill((255,255,255))
-        self.gates_pool = list([Biba((0,0), "./gates/and.png", "./gates/and.png",2,1),
-                              Biba((0,0), "./gates/or.png", "./gates/or.png",2,1),
-                              Biba((0,0), "./gates/button.png", "./gates/button.png",0,1),
-                              Biba((0,0), "./gates/output.png", "./gates/output.png",1,0)])
+        self.rect = self.surface.get_rect(center=(width*3 + width//2, height//2))
+        self.surface.fill((255, 255, 255))
+        self.gates_pool = list([Biba((0, 0), "./gates/and.png", "./gates/and.png", 2, 1),
+                                Biba((0, 0), "./gates/or.png", "./gates/or.png", 2, 1),
+                                Biba((0, 0), "./gates/button.png", "./gates/button.png", 0, 1),
+                                Biba((0, 0), "./gates/output.png", "./gates/output.png", 1, 0)])
         self.font = pg.font.SysFont(None, 20)
-        self.gates_names = [self.font.render(element.name[8:-4], True, (0,0,0)) for element in self.gates_pool]
-        #self.gates_names = [element.name[8:-4] for element in self.gates_pool] нужна для отладки
+        self.gates_names = [self.font.render(element.name[8:-4], True, (0, 0, 0)) for element in self.gates_pool]
+        # self.gates_names = [element.name[8:-4] for element in self.gates_pool] нужна для отладки
         sum_heights = 5
         for element in self.gates_pool:
             element.rect.inflate_ip(0, 15)
@@ -179,7 +180,7 @@ class gates_list:
         self.redraw()
         
     def redraw(self):
-        self.surface.fill((255,255,255))
+        self.surface.fill((255, 255, 255))
         for element, name in zip(self.gates_pool, self.gates_names):
             self.surface.blit(element.image, element.rect)
             self.surface.blit(name, name.get_rect(center=(element.rect.center[0],
@@ -194,7 +195,7 @@ class gates_list:
         for element in self.gates_pool:
             if element.rect.collidepoint((coord[0], coord[1])):
                 if abs(self.time_name[0] - time.time()) < 0.5 and self.time_name[1] == element.name:
-                    Display.l_screen.create_object(element)
+                    display.l_screen.create_object(element)
                     
                     break
                 else:
@@ -202,7 +203,7 @@ class gates_list:
                     self.time_name[1] = element.name
                     color_rect = pg.Rect(0, element.rect.top, self.rect.width, element.rect.height)
                     color_surface = pg.surface.Surface((color_rect.width, color_rect.height))
-                    color_surface.fill((200,200,200))
+                    color_surface.fill((200, 200, 200))
                     color_surface.set_alpha(128)
                     self.surface.blit(color_surface, color_rect)
                     break
@@ -211,41 +212,41 @@ class gates_list:
 # In[7]:
 
 
-class field:
+class Field:
     def __init__(self, width, height):
         self.scale_val = 100
         self.scale_speed = 10
-        self.scale_edges = [50, 150] # speed должен быть кратен разности val и edges[0]
+        self.scale_edges = [50, 150]  # speed должен быть кратен разности val и edges[0]
         k = (self.scale_val-self.scale_edges[0])/self.scale_speed
         self.surface = pg.surface.Surface((width//k*k*2, height//k*k*2))
-        self.surface.fill((255,255,255))
-        self.pool_objects = [list(), list()] # 0 - вентили, 1 - провода
-        self.rect = self.surface.get_rect(center = (width//k*k//2, height//k*k//2))
-        self.time_name = [0, -1] # хранит время последнего клика правой кнопки мыши и имя объекта
+        self.surface.fill((255, 255, 255))
+        self.pool_objects = [list(), list()]  # 0 - вентили, 1 - провода
+        self.rect = self.surface.get_rect(center=(width//k*k//2, height//k*k//2))
+        self.time_name = [0, -1]  # хранит время последнего клика правой кнопки мыши и имя объекта
         self.moveobj = None
-        self.old_coord = [0,0]
+        self.old_coord = [0, 0]
         
     def redraw(self):
-        self.surface.fill((255,255,255))
+        self.surface.fill((255, 255, 255))
         for element in self.pool_objects[0]:
             self.surface.blit(element.image, element.rect)
             
         for element in self.pool_objects[1]:
             try:
                 self.draw_wire(element.input.rect.center, element.output.rect.center, element.color)
-                #pg.draw.line(self.surface, element.color, element.input.rect.center, 
-                             #element.output.rect.center, 2)
+                # pg.draw.line(self.surface, element.color, element.input.rect.center,
+                # element.output.rect.center, 2)
             except:
                 pass
     
     def draw_wire(self, inp, outp, color):
-        pg.draw.line(self.surface, color, inp, [outp[0]//2 + inp[0]//2,inp[1]], 1)
+        pg.draw.line(self.surface, color, inp, [outp[0]//2 + inp[0]//2, inp[1]], 1)
         pg.draw.line(self.surface, color, [outp[0]//2 + inp[0]//2, inp[1]], [outp[0]//2 + inp[0]//2, outp[1]], 1)
         pg.draw.line(self.surface, color, [outp[0]//2 + inp[0]//2, outp[1]], outp, 1)
     
     def scale_const(self, k):
         new_scale = self.scale_val + self.scale_speed*k
-        if self.scale_edges[0] <= new_scale <= self.scale_edges[1] and self.moveobj == None:
+        if self.scale_edges[0] <= new_scale <= self.scale_edges[1] and self.moveobj is None:
             self.scale_val = new_scale
             self.moveobj = self.rect
             self.old_coord = list(self.rect.center)
@@ -254,11 +255,11 @@ class field:
             
     def scale(self):
         sc_surf = pg.transform.smoothscale(self.surface,
-                                     (self.rect.width*self.scale_val//100, self.rect.height*self.scale_val//100))
-        sc_rect = sc_surf.get_rect(center = self.rect.center)
+                                           (self.rect.width*self.scale_val//100, self.rect.height*self.scale_val//100))
+        sc_rect = sc_surf.get_rect(center=self.rect.center)
         return sc_surf, sc_rect
     
-    def transform_c(self, x, y):    #преобразование координат из системы дисплея в систему поверхности класса field
+    def transform_c(self, x, y):    # преобразование координат из системы дисплея в систему поверхности класса Field
         n_x = self.rect.left + (x - self.rect.center[0])*100//self.scale_val + self.rect.width//2
         n_y = self.rect.top + (y - self.rect.center[1])*100//self.scale_val + self.rect.height//2
         return n_x, n_y
@@ -267,16 +268,16 @@ class field:
         coord = self.transform_c(*coord)
         if self.moveobj.__str__() == "wire":
             self.redraw()
-            if self.moveobj.output == None:
-                #pg.draw.line(self.surface, [0,0,0], self.moveobj.input.rect.center,
-                             #(coord[0] - self.rect.left, coord[1] - self.rect.top), 2)
+            if self.moveobj.output is None:
+                # pg.draw.line(self.surface, [0, 0, 0], self.moveobj.input.rect.center,
+                # (coord[0] - self.rect.left, coord[1] - self.rect.top), 2)
                 self.draw_wire(self.moveobj.input.rect.center,
-                               (coord[0] - self.rect.left, coord[1] - self.rect.top), [0,0,0])
+                               (coord[0] - self.rect.left, coord[1] - self.rect.top), [0, 0, 0])
             else:
-                #pg.draw.line(self.surface, [0,0,0], self.moveobj.output.rect.center,
-                             #(coord[0] - self.rect.left, coord[1] - self.rect.top), 2)
+                # pg.draw.line(self.surface, [0, 0, 0], self.moveobj.output.rect.center,
+                # (coord[0] - self.rect.left, coord[1] - self.rect.top), 2)
                 self.draw_wire(self.moveobj.output.rect.center,
-                               (coord[0] - self.rect.left, coord[1] - self.rect.top), [0,0,0])
+                               (coord[0] - self.rect.left, coord[1] - self.rect.top), [0, 0, 0])
                             
         elif self.moveobj == self.rect:
             self.rect.move_ip(coord[0] - self.old_coord[0], 
@@ -284,9 +285,11 @@ class field:
             if self.rect.center[0] - self.rect.width*self.scale_val//100//2 > 0:
                 self.rect.move_ip(-(self.rect.center[0] - self.rect.width*self.scale_val//100//2), 0)
             elif self.rect.center[0] + self.rect.width*self.scale_val//100//2 < self.rect.width//2:
-                self.rect.move_ip(self.rect.width//2 - (self.rect.center[0] + self.rect.width*self.scale_val//100//2), 0)
+                self.rect.move_ip(self.rect.width//2 - 
+                                  (self.rect.center[0] + self.rect.width * self.scale_val//100//2), 0)
             if self.rect.center[1] + self.rect.height*self.scale_val//100//2 < self.rect.height//2:
-                self.rect.move_ip(0, self.rect.height//2 - (self.rect.center[1] + self.rect.height*self.scale_val//100//2))
+                self.rect.move_ip(0, self.rect.height//2 - 
+                                  (self.rect.center[1] + self.rect.height * self.scale_val // 100 // 2))
             elif self.rect.center[1] - self.rect.height*self.scale_val//100//2 > 0:
                 self.rect.move_ip(0, -(self.rect.center[1] - self.rect.height*self.scale_val//100//2))
             self.old_coord = coord
@@ -298,16 +301,15 @@ class field:
                 self.moveobj.move((self.rect.width - 10, coord[1] - self.rect.top))
             self.redraw()
     
-    
     def click_lmouse(self, coord):
         coord = self.transform_c(*coord)
         for element in self.pool_objects[0][::-1]:
             if element.rect.collidepoint((coord[0] - self.rect.left, coord[1] - self.rect.top)):
-                #print(element.left_rect)
+                # print(element.left_rect)
                 
                 part, gateway = element.where_to_click((coord[0] - self.rect.left, coord[1] - self.rect.top))
                 if part == "input" or part == "output":
-                    if gateway.wire == None:
+                    if gateway.wire is None:
                         global count_of_wires
                         if part == "input":
                             gateway.change_wire(Wire(f"wire{count_of_wires}", None, gateway))
@@ -315,41 +317,41 @@ class field:
                             gateway.change_wire(Wire(f"wire{count_of_wires}", gateway, None))
                             count_of_wires += 1
                         self.moveobj = gateway.wire
-                        #pg.draw.line(self.surface, [0,0,0], gateway.rect.center,
-                                     #(coord[0] - self.rect.left, coord[1] - self.rect.top), 2)
+                        # pg.draw.line(self.surface, [0, 0, 0], gateway.rect.center,
+                        # (coord[0] - self.rect.left, coord[1] - self.rect.top), 2)
                         self.draw_wire(gateway.rect.center,
-                                       (coord[0] - self.rect.left, coord[1] - self.rect.top), [0,0,0])
+                                       (coord[0] - self.rect.left, coord[1] - self.rect.top), [0, 0, 0])
                     else:
                         self.moveobj = gateway.wire
                         if part == "input":
                             self.moveobj.change_output()
                             self.redraw()
-                            #pg.draw.line(self.surface, [0,0,0], self.moveobj.input.rect.center,
-                                         #(coord[0] - self.rect.left, coord[1] - self.rect.top), 2)
+                            # pg.draw.line(self.surface, [0, 0, 0], self.moveobj.input.rect.center,
+                            # (coord[0] - self.rect.left, coord[1] - self.rect.top), 2)
                             self.draw_wire(self.moveobj.input.rect.center,
-                                           (coord[0] - self.rect.left, coord[1] - self.rect.top), [0,0,0])
+                                           (coord[0] - self.rect.left, coord[1] - self.rect.top), [0, 0, 0])
                         else:
                             self.moveobj.change_input()
                             self.redraw()
-                            #pg.draw.line(self.surface, [0,0,0], self.moveobj.output.rect.center,
-                                         #(coord[0] - self.rect.left, coord[1] - self.rect.top), 2)
+                            # pg.draw.line(self.surface, [0, 0, 0], self.moveobj.output.rect.center,
+                            # (coord[0] - self.rect.left, coord[1] - self.rect.top), 2)
                             self.draw_wire((coord[0] - self.rect.left, coord[1] - self.rect.top),
-                                           self.moveobj.output.rect.center, [0,0,0])
+                                           self.moveobj.output.rect.center, [0, 0, 0])
                         gateway.change_wire()
                         self.pool_objects[1].remove(self.moveobj)
                     break
                     
                 else:
-                    #print("in", [x.wire for x in element.input_pool])
-                    #print("out", [x.wire for x in element.output_pool])
-                    #print("...")
+                    # print("in", [x.wire for x in element.input_pool])
+                    # print("out", [x.wire for x in element.output_pool])
+                    # print("...")
                     self.moveobj = element
                     self.moveobj.update_offsets((coord[0] - self.rect.left, coord[1] - self.rect.top))
                     self.pool_objects[0].remove(element)
                     self.pool_objects[0].append(element)
                     self.redraw()
                     break
-        if self.moveobj == None:
+        if self.moveobj is None:
             self.moveobj = self.rect
             self.old_coord = [coord[0], coord[1]]
         
@@ -359,17 +361,18 @@ class field:
             for element in self.pool_objects[0][::-1]:
                 if element.rect.collidepoint((coord[0] - self.rect.left, coord[1] - self.rect.top)):
                     part, gateway = element.where_to_click((coord[0] - self.rect.left, coord[1] - self.rect.top))
-                    if (part == "input" or part == "output") and gateway.wire == None:
-                        if part == "input" and self.moveobj.output == None and gateway.name != self.moveobj.input.name:
+                    if (part == "input" or part == "output") and gateway.wire is None:
+                        if part == "input" and self.moveobj.output is None and gateway.name != self.moveobj.input.name:
                             self.moveobj.change_output(gateway)
                             gateway.change_wire(self.moveobj)
                             self.pool_objects[1].append(gateway.wire)
-                        elif part == "output" and self.moveobj.input == None and gateway.name != self.moveobj.output.name:
+                        elif part == "output" and self.moveobj.input is None \
+                                and gateway.name != self.moveobj.output.name:
                             self.moveobj.change_input(gateway)
                             gateway.change_wire(self.moveobj)
                             self.pool_objects[1].append(gateway.wire)
                         break
-            if self.moveobj.output == None or self.moveobj.input == None:
+            if self.moveobj.output is None or self.moveobj.input is None:
                 self.moveobj.del_self()
             self.redraw()
         self.moveobj = None
@@ -382,8 +385,8 @@ class field:
         
         coord = self.transform_c(self.rect.width//4, self.rect.height//4)
         self.pool_objects[0].append(obj.__class__((coord[0] - self.rect.left, coord[1] - self.rect.top),
-                                         obj.name, f"gate{count_of_gates}", len(obj.input_pool),
-                                                  len(obj.output_pool), len(obj.selector_pool)))
+                                    obj.name, f"gate{count_of_gates}", len(obj.input_pool),
+                                    len(obj.output_pool), len(obj.selector_pool)))
         self.surface.blit(self.pool_objects[0][-1].image, self.pool_objects[0][-1].rect)
         count_of_gates += 1
         
@@ -393,7 +396,7 @@ class field:
             if element.rect.collidepoint((coord[0] - self.rect.left, coord[1] - self.rect.top)):
                 part, gateway = element.where_to_click((coord[0] - self.rect.left, coord[1] - self.rect.top))
                 if part == "input" or part == "output":
-                    if gateway.wire != None:
+                    if gateway.wire is not None:
                         element = gateway.wire
                 if abs(self.time_name[0] - time.time()) < 0.5 and self.time_name[1] == element.name:
                     if element.__str__() == "wire":
@@ -424,39 +427,41 @@ class field:
 count_of_gates = 0
 count_of_wires = 0
 pg.init()
-Display = display(GetSystemMetrics(0)*3//4, GetSystemMetrics(1)*3//4)
+display = Display(GetSystemMetrics(0) * 3 // 4, GetSystemMetrics(1) * 3 // 4)
 runGame = True
 while runGame:
     for event in pg.event.get():
-        if event.type == pg.QUIT: runGame = False
+        if event.type == pg.QUIT:
+            runGame = False
             
         if event.type == pg.MOUSEBUTTONUP:
             if event.button == 1:
-                Display.l_screen.lbutton_up(event.pos)
+                display.l_screen.lbutton_up(event.pos)
             
         if event.type == pg.MOUSEMOTION:
-            if Display.l_screen.moveobj:
-                Display.l_screen.move_obj(event.pos)
+            if display.l_screen.moveobj:
+                display.l_screen.move_obj(event.pos)
         
         if event.type == pg.MOUSEBUTTONDOWN:
             if event.button == 1:
-                if Display.r_screen.rect.collidepoint(event.pos):
-                    Display.r_screen.click_lmouse(event.pos)
+                if display.r_screen.rect.collidepoint(event.pos):
+                    display.r_screen.click_lmouse(event.pos)
                 else:
-                    Display.l_screen.click_lmouse(event.pos)
+                    display.l_screen.click_lmouse(event.pos)
             if event.button == 3:
-                if Display.r_screen.rect.collidepoint(event.pos):
+                if display.r_screen.rect.collidepoint(event.pos):
                     pass
                 else:
-                    Display.l_screen.click_rmouse(event.pos)
+                    display.l_screen.click_rmouse(event.pos)
         
-        if event.type == pg.KEYDOWN and event.key == pg.K_MINUS or event.type == pg.MOUSEBUTTONDOWN and event.button == 5:
-            Display.l_screen.scale_const(-1)
+        if event.type == pg.KEYDOWN and event.key == pg.K_MINUS \
+                or event.type == pg.MOUSEBUTTONDOWN and event.button == 5:
+            display.l_screen.scale_const(-1)
 
-        if event.type == pg.KEYDOWN and event.key == pg.K_EQUALS or event.type == pg.MOUSEBUTTONDOWN and event.button == 4:
-            Display.l_screen.scale_const(1)
+        if event.type == pg.KEYDOWN and event.key == pg.K_EQUALS \
+                or event.type == pg.MOUSEBUTTONDOWN and event.button == 4:
+            display.l_screen.scale_const(1)
 
-    Display.redraw()
+    display.redraw()
     pg.display.update()
 pg.quit()
-
