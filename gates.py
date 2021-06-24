@@ -14,18 +14,18 @@ class Gate:
     def __init__(self, gname: str, inum: int, onum: int, selnum=0, *inpvs):
         assert (len(inpvs) == inum or not inpvs), all(bool_portable(x) for x in inpvs)
         global current_gates_number
-        self.gate_name = gname
-        self.input_number = inum            # number of input channels in the gate
+        self.__gate_name = gname
+        self.__input_number = inum            # number of input channels in the gate
         self.output_number = onum           # number of output channels in the gate
         self.select_lines_number = selnum   # number of selectors in the gate
         if not inpvs:
-            self.input_values = [None for _ in range(self.input_number)]  # None is analogue of "X" state
+            self.input_values = [None for _ in range(self.__input_number)]  # None is analogue of "X" state
         else:
             self.input_values = [bool(i) for i in inpvs]
         self.select_values = []                                              # todo! does it make any sense?
         self.out_connections_list = [{} for _ in range(self.output_number)]  # list of (output_number) dicts with
         # connected gate as key and its input channel as value
-        self.in_connections_list = [None for _ in range(self.input_number)]  # list of (input_number) connnected
+        self.in_connections_list = [None for _ in range(self.__input_number)]  # list of (__input_number) connected
         # Gates, where index is (input channel number - 1)
         self.output_values = [None for _ in range(self.output_number)]
         current_gates_number += 1
@@ -51,7 +51,7 @@ class Gate:
 
         else:
             other_channel_number -= 1
-            other.input_values[other_channel_number] = self.func()
+            other.input_values[other_channel_number] = self.func()[0]
             self.out_connections_list[self_channel_number][other] = other_channel_number + 1
             other.in_connections_list[other_channel_number] = self
             connected = True
@@ -78,6 +78,18 @@ class Gate:
                     other.input_values[self.out_connections_list[channel][gate]-1] = None
                     self.out_connections_list[channel] = {}
 
+    def change_signal(self, value):  # doesn't work with DMS
+        assert isinstance(value, bool)
+        self.output_values = [bool(value)]
+        for _ in range(len(self.out_connections_list)):
+            if not len(self.out_connections_list[0]):
+                return
+            connected_gate, num = list(self.out_connections_list[0].keys())[0], \
+                                  list(self.out_connections_list[0].values())[0]
+            self.disconnect(connected_gate)
+            self.connect(connected_gate, None, num)
+            connected_gate.change_signal(connected_gate.func()[0])
+
     def return_value(self, values):
         assert all(isinstance(x, bool) for x in self.output_values), "Output error: invalid output values"
         for output_channel in range(self.output_number):
@@ -86,8 +98,8 @@ class Gate:
         return values  # fixme! it should look more beautiful
 
     def get_info(self):
-        ret = f"Gate name is '{self.gate_name}'\n"\
-              f"Number of inputs: {self.input_number}, number of outputs: {self.output_number}\n\n"\
+        ret = f"Gate name is '{self.__gate_name}'\n"\
+              f"Number of inputs: {self.__input_number}, number of outputs: {self.output_number}\n\n"\
               f"This gate is in-connected to:\n"
         for channel in range(len(self.in_connections_list)):
             ret += "\tChannel "+str(channel+1)+": "
@@ -99,7 +111,7 @@ class Gate:
         for channel in range(len(self.out_connections_list)):
             ret += "\tChannel "+str(channel+1)+": "
             for gate in self.out_connections_list[channel]:
-                ret += f"\t\t{gate.gate_name} to its in-channel {self.out_connections_list[channel][gate]}\n"
+                ret += f"\t\t{gate.__gate_name} to its in-channel {self.out_connections_list[channel][gate]}\n"
             else:
                 ret += "unconnected\n"
         ret += f"\nInput values are: {self.input_values}\n"
@@ -182,6 +194,16 @@ class SND(Gate):
         assert isinstance(value, bool)
         super().__init__(gname, 0, 1)
         self.output_values = [bool(value)]
+
+    def change_signal(self, value):
+        assert isinstance(value, bool)
+        self.output_values = [bool(value)]
+        for _ in range(len(self.out_connections_list)):
+            connected_gate, num = list(self.out_connections_list[0].keys())[0], \
+                                  list(self.out_connections_list[0].values())[0]
+            self.disconnect(connected_gate)
+            self.connect(connected_gate, None, num)
+            connected_gate.change_signal(connected_gate.func()[0])
 
 
 class RCV(Gate):
