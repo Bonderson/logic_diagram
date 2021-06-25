@@ -200,10 +200,13 @@ class RCV(Gate):
     def __init__(self, value=None, gname="RCV" + str(current_gates_number + 1)):
         assert value is None or isinstance(value, bool)
         super().__init__(gname, 1, 0)
-        self.input_values = [value]
+        self._input_values = [value]
 
     def func(self, sel=None):
-        return self.input_values[0]
+        return self._input_values
+
+    def change_signal(self, value):
+        self._input_values = [value]
 
 
 class MUX(Gate):
@@ -211,7 +214,7 @@ class MUX(Gate):
         if selnum == 0:
             selnum = ceil(log2(inum))
         super().__init__(gname, inum, 1, selnum, *inpvs)
-        self.select_values = [0 for _ in range(0, selnum)]  # fixme! Does it make any sense?
+        self._select_values = [0 for _ in range(0, selnum)]  # fixme! Does it make any sense?
         self._output_values = [None]
 
     def func(self, sel=None):
