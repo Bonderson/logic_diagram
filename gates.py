@@ -72,23 +72,23 @@ class Gate:
 
         # todo! write it more beautiful
         for channel in range(len(self._out_connections_list)):
-            for gate in self._out_connections_list[channel]:
+            it = self._out_connections_list[channel].copy()
+            for gate in it:
                 if gate is other:
                     other._in_connections_list[self._out_connections_list[channel][gate] - 1] = None
                     other._input_values[self._out_connections_list[channel][gate] - 1] = None
-                    self._out_connections_list[channel] = {}
+                    self._out_connections_list[channel].pop(other)
 
     def change_signal(self, value):  # doesn't work with DMS
         assert isinstance(value, bool)
         self._output_values = [bool(value)]
         for _ in range(len(self._out_connections_list)):
-            if not len(self._out_connections_list[0]):
-                return
-            connected_gate, num = list(self._out_connections_list[0].keys())[0], \
-                                  list(self._out_connections_list[0].values())[0]
-            self.disconnect(connected_gate)
-            self.connect(connected_gate, None, num)
-            connected_gate.change_signal(connected_gate.func()[0])
+            if len(self._out_connections_list[0]):
+                connected_gate, num = list(self._out_connections_list[0].keys())[0], \
+                                      list(self._out_connections_list[0].values())[0]
+                self.disconnect(connected_gate)
+                self.connect(connected_gate, None, num)
+                connected_gate.change_signal(connected_gate.func()[0])
 
     def __return_value(self, values):
         assert all(isinstance(x, bool) for x in self._output_values), "Output error: invalid output values"
